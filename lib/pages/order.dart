@@ -61,24 +61,35 @@ class _OrderState extends State<Order> {
   Future<void> updateQuantity(String itemId, int quantity) async {
     if (quantity <= 0) return;
     await DatabaseMethods().updateCartItemQuantity(id!, itemId, quantity);
-    recalculateTotal();
+    recalculateTotal(); // Ensure recalculating after updating quantity
   }
 
   void recalculateTotal() async {
     total = 0; // Reset total
     if (id != null) {
-      final foodItems =
-          await DatabaseMethods().getFoodCart(id!); // Get cart items
-      final snapshot = await foodItems.first; // Get the first snapshot
+      final foodItems = await DatabaseMethods().getFoodCart(id!);
+      final snapshot = await foodItems.first;
       for (var doc in snapshot.docs) {
-        int quantity = int.tryParse(doc["Quantity"].toString()) ??
-            1; // Ensure quantity is an int
-        int itemTotal = int.tryParse(doc["Total"].toString()) ??
-            0; // Ensure total is parsed
-        total +=
-            itemTotal * quantity; // Calculate total as itemTotal * quantity
+        // Debugging: Print the entire document
+        print("Document data: ${doc.data()}");
+
+        int quantity = num.tryParse(doc["Quantity"].toString())?.toInt() ?? 1;
+        int itemTotal = num.tryParse(doc["Total"].toString())?.toInt() ?? 0;
+
+        // Fallback logic if Total is 0
+        if (itemTotal == 0) {
+          int price = num.tryParse(doc["Price"].toString())?.toInt() ??
+              0; // Ensure price exists
+          itemTotal =
+              price * quantity; // Calculate total from price and quantity
+        }
+
+        total += itemTotal; // Update total price
+        print(
+            "Item: ${doc["Name"]}, Quantity: $quantity, ItemTotal: $itemTotal");
       }
-      setState(() {}); // Update the UI
+      print("Total Price: $total");
+      setState(() {}); // Update the UI with the new total
     }
   }
 
@@ -124,10 +135,18 @@ class _OrderState extends State<Order> {
           shrinkWrap: true,
           itemBuilder: (context, index) {
             DocumentSnapshot ds = snapshot.data!.docs[index];
-            int quantity = int.tryParse(ds["Quantity"].toString()) ??
+            int quantity = num.tryParse(ds["Quantity"].toString())?.toInt() ??
                 1; // Ensure this is an int
-            int itemTotal = int.tryParse(ds["Total"].toString()) ??
+            int itemTotal = num.tryParse(ds["Total"].toString())?.toInt() ??
                 0; // Ensure total is parsed
+
+            // Fallback logic if Total is 0
+            if (itemTotal == 0) {
+              int price = num.tryParse(ds["Price"].toString())?.toInt() ??
+                  0; // Ensure price exists
+              itemTotal =
+                  price * quantity; // Calculate total from price and quantity
+            }
 
             return Container(
               margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
