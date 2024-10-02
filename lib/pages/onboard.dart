@@ -49,7 +49,7 @@ class _OnboardState extends State<Onboard> {
                         children: [
                           Image.asset(
                             contents[i].image,
-                            height: MediaQuery.of(context).size.width / 1.2,
+                            height: 450,
                             width: MediaQuery.of(context).size.width / 1.2,
                             fit: BoxFit.cover,
                           ),
