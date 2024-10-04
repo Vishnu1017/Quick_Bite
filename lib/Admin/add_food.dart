@@ -19,7 +19,7 @@ class _AddFoodState extends State<AddFood> {
     'Burger',
     'Salad',
     'Pizza',
-    'Chats',
+    'Chaats',
   ];
   String? value;
   TextEditingController namecontroller = TextEditingController();
@@ -66,6 +66,14 @@ class _AddFoodState extends State<AddFood> {
               "Food Item has been added Successfully",
               style: TextStyle(fontSize: 18),
             )));
+        // Reset the form after successful submission
+        namecontroller.clear();
+        pricecontroller.clear();
+        detailcontroller.clear();
+        setState(() {
+          selectedImage = null;
+          value = null; // Reset the dropdown value
+        });
       }).catchError((error) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           backgroundColor: Colors.red,
@@ -94,9 +102,15 @@ class _AddFoodState extends State<AddFood> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.blueAccent,
         title: Text(
           "Add Item",
-          style: AppWidget.HeadLineTextFeildStyle(),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            fontFamily: "Poppins",
+          ),
         ),
         centerTitle: true,
         leading: GestureDetector(
@@ -105,14 +119,13 @@ class _AddFoodState extends State<AddFood> {
           },
           child: const Icon(
             Icons.arrow_back_ios_new_outlined,
-            color: Color(0xFF373866),
+            color: Colors.black,
           ),
         ),
       ),
       body: SingleChildScrollView(
         child: Container(
-          margin:
-              const EdgeInsets.only(left: 20, top: 20, bottom: 40, right: 20),
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -122,28 +135,42 @@ class _AddFoodState extends State<AddFood> {
               ),
               const SizedBox(height: 20),
               selectedImage == null
-                  ? GestureDetector(
-                      onTap: () {
-                        getImage();
-                      },
-                      child: Center(
-                        child: Material(
-                          elevation: 5,
-                          borderRadius: BorderRadius.circular(20),
-                          child: Container(
-                            width: 150,
-                            height: 150,
-                            decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: Colors.black,
-                                  width: 1.5,
-                                ),
-                                borderRadius: BorderRadius.circular(20)),
-                            child: const Icon(
-                              Icons.camera_alt_outlined,
-                              color: Colors.black,
-                              size: 32,
+                  ? Center(
+                      child: Container(
+                        width: MediaQuery.of(context).size.width * 0.45,
+                        height: MediaQuery.of(context).size.height * 0.18,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            getImage();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            elevation: 8,
+                            backgroundColor:
+                                Colors.blueAccent, // Background color
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(20), // Rounded corners
                             ),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.camera_alt_outlined,
+                                color: Colors.white,
+                                size: 32,
+                              ),
+                              const SizedBox(
+                                  height: 8), // Spacing between icon and text
+                              const Text(
+                                "Upload Image",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -156,11 +183,13 @@ class _AddFoodState extends State<AddFood> {
                           width: 150,
                           height: 150,
                           decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Colors.black,
-                                width: 1.5,
-                              ),
-                              borderRadius: BorderRadius.circular(20)),
+                            color: const Color(0xFFececf8),
+                            border: Border.all(
+                              color: Colors.black,
+                              width: 1.5,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(20),
                             child: Image.file(
@@ -172,154 +201,177 @@ class _AddFoodState extends State<AddFood> {
                       ),
                     ),
               const SizedBox(height: 30),
-              Text(
-                "Item Name",
-                style: AppWidget.semiboldTextFeildStyle(),
-              ),
-              const SizedBox(height: 10),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                width: MediaQuery.of(context).size.width,
-                decoration: BoxDecoration(
-                    color: const Color(0xFFececf8),
-                    borderRadius: BorderRadius.circular(10)),
-                child: TextField(
-                  controller: namecontroller,
-                  decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: "Enter Item Name",
-                      hintStyle: AppWidget.LightTextFeildStyle()),
-                ),
-              ),
+              _buildTextField("Item Name", namecontroller, "Enter Item Name"),
               const SizedBox(height: 30),
-              Text(
-                "Item Price",
-                style: AppWidget.semiboldTextFeildStyle(),
-              ),
-              const SizedBox(height: 10),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                width: MediaQuery.of(context).size.width,
-                decoration: BoxDecoration(
-                    color: const Color(0xFFececf8),
-                    borderRadius: BorderRadius.circular(10)),
-                child: TextField(
-                  controller: pricecontroller,
-                  decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: "Enter Item Price",
-                      hintStyle: AppWidget.LightTextFeildStyle()),
-                ),
-              ),
+              _buildTextField(
+                  "Item Price", pricecontroller, "Enter Item Price"),
               const SizedBox(height: 30),
-              Text(
-                "Item Detail",
-                style: AppWidget.semiboldTextFeildStyle(),
-              ),
-              const SizedBox(height: 10),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                width: MediaQuery.of(context).size.width,
-                decoration: BoxDecoration(
-                    color: const Color(0xFFececf8),
-                    borderRadius: BorderRadius.circular(10)),
-                child: TextField(
-                  maxLines: 6,
-                  controller: detailcontroller,
-                  decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: "Enter Item Detail",
-                      hintStyle: AppWidget.LightTextFeildStyle()),
-                ),
-              ),
+              _buildDetailTextField(
+                  "Item Detail", detailcontroller, "Enter Item Detail"),
               const SizedBox(height: 30),
-              Text(
-                "Select Category",
-                style: AppWidget.semiboldTextFeildStyle(),
-              ),
-              const SizedBox(height: 10),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-                width: MediaQuery.of(context).size.width,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFececf8),
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 5,
-                      offset: Offset(2, 2),
-                    ),
-                  ],
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    items: items
-                        .map((item) => DropdownMenuItem<String>(
-                            value: item,
-                            child: Text(
-                              item,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            )))
-                        .toList(),
-                    onChanged: ((value) => setState(() {
-                          this.value = value;
-                        })),
-                    dropdownColor: Colors.white,
-                    hint: const Text(
-                      "Select Category",
-                      style: TextStyle(fontSize: 18, color: Colors.black54),
-                    ),
-                    iconSize: 36,
-                    icon:
-                        const Icon(Icons.arrow_drop_down, color: Colors.black),
-                    isExpanded: true,
-                    borderRadius: BorderRadius.circular(10),
-                    value: value,
-                  ),
-                ),
-              ),
+              _buildDropdownField(),
               const SizedBox(height: 40),
-              GestureDetector(
-                onTap: _isLoading
-                    ? null
-                    : () => uploadItem(), // Disable when loading
-                child: Center(
-                  child: Material(
-                    elevation: 10,
-                    borderRadius: BorderRadius.circular(50),
-                    child: Container(
-                      width: MediaQuery.of(context).size.width / 2.3,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                      child: Center(
-                        child: _isLoading
-                            ? CircularProgressIndicator(
-                                color: Colors.white,
-                              )
-                            : const Text(
-                                "Add Item",
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w700),
-                              ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              _buildSubmitButton(),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(
+      String label, TextEditingController controller, String hint) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: AppWidget.semiboldTextFeildStyle(),
+        ),
+        const SizedBox(height: 10),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          decoration: BoxDecoration(
+            color: const Color(0xFFececf8),
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 5,
+                offset: Offset(2, 2),
+              ),
+            ],
+          ),
+          child: TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              hintText: hint,
+              hintStyle: AppWidget.LightTextFeildStyle(),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDetailTextField(
+      String label, TextEditingController controller, String hint) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: AppWidget.semiboldTextFeildStyle(),
+        ),
+        const SizedBox(height: 10),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          decoration: BoxDecoration(
+            color: const Color(0xFFececf8),
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 5,
+                offset: Offset(2, 2),
+              ),
+            ],
+          ),
+          child: TextField(
+            maxLines: 6,
+            controller: controller,
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              hintText: hint,
+              hintStyle: AppWidget.LightTextFeildStyle(),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDropdownField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Select Category",
+          style: AppWidget.semiboldTextFeildStyle(),
+        ),
+        const SizedBox(height: 10),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+          width: MediaQuery.of(context).size.width,
+          decoration: BoxDecoration(
+            color: const Color(0xFFececf8),
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 5,
+                offset: Offset(2, 2),
+              ),
+            ],
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              items: items
+                  .map((item) => DropdownMenuItem<String>(
+                      value: item,
+                      child: Text(
+                        item,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      )))
+                  .toList(),
+              onChanged: ((value) => setState(() {
+                    this.value = value;
+                  })),
+              dropdownColor: Colors.white,
+              hint: const Text(
+                "Select Category",
+                style: TextStyle(fontSize: 18, color: Colors.black54),
+              ),
+              iconSize: 36,
+              icon: const Icon(Icons.arrow_drop_down, color: Colors.black),
+              isExpanded: true,
+              borderRadius: BorderRadius.circular(10),
+              value: value,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return Center(
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.black,
+          padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+          textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(50),
+          ),
+        ),
+        onPressed: () {
+          uploadItem();
+        },
+        child: _isLoading
+            ? const CircularProgressIndicator(color: Colors.white)
+            : const Text(
+                "Add Item",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700),
+              ),
       ),
     );
   }

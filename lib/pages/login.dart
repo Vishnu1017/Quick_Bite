@@ -51,7 +51,7 @@ class _LogInState extends State<LogIn> {
           backgroundColor: Colors.green,
           content: Text(
             "Login Successfully",
-            style: TextStyle(fontSize: 20),
+            style: TextStyle(fontSize: 18),
           )));
 
       // Retrieve user ID

@@ -103,7 +103,7 @@ class _HomeAdminState extends State<HomeAdmin> {
                 fit: BoxFit.cover,
               ),
             ),
-            const SizedBox(width: 40),
+            SizedBox(width: MediaQuery.of(context).size.width * 0.1),
             Text(
               label,
               style: const TextStyle(

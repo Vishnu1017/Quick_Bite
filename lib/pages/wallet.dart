@@ -297,8 +297,11 @@ class _WalletState extends State<Wallet> {
   }
 
   void showSnackBar(String message, BuildContext context) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(
+      message,
+      style: TextStyle(fontSize: 18),
+    )));
   }
 
   Future openEdit() => showDialog(

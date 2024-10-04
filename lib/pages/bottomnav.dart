@@ -36,10 +36,17 @@ class _BottomNavState extends State<BottomNav>
 
   @override
   Widget build(BuildContext context) {
+    double iconSize =
+        MediaQuery.of(context).size.width * 0.075; // Dynamic icon size
+    double navBarHeight = MediaQuery.of(context).size.height * 0.09;
+
+    // Ensure the height doesn't exceed 75.0
+    navBarHeight = navBarHeight > 75.0 ? 75.0 : navBarHeight;
+
     return Scaffold(
       body: currentPage, // Display the current page
       bottomNavigationBar: CurvedNavigationBar(
-        height: 70,
+        height: navBarHeight, // Height limited to 75
         backgroundColor: Colors.transparent,
         color: Colors.blueAccent, // Navigation bar color
         animationDuration: const Duration(milliseconds: 300),
@@ -51,16 +58,16 @@ class _BottomNavState extends State<BottomNav>
           });
         },
         items: [
-          _buildNavIcon(Icons.home, 0),
-          _buildNavIcon(Icons.shopping_cart, 1),
-          _buildNavIcon(Icons.wallet, 2),
-          _buildNavIcon(Icons.person, 3),
+          _buildNavIcon(Icons.home, 0, iconSize),
+          _buildNavIcon(Icons.shopping_cart, 1, iconSize),
+          _buildNavIcon(Icons.wallet, 2, iconSize),
+          _buildNavIcon(Icons.person, 3, iconSize),
         ],
       ),
     );
   }
 
-  Widget _buildNavIcon(IconData icon, int index) {
+  Widget _buildNavIcon(IconData icon, int index, double iconSize) {
     return AnimatedScale(
       scale: currentTabIndex == index
           ? 1.2
@@ -81,13 +88,12 @@ class _BottomNavState extends State<BottomNav>
           ],
         ),
         child: Padding(
-          padding: const EdgeInsets.all(8.0), // Padding around the icon
+          padding: EdgeInsets.all(
+              MediaQuery.of(context).size.width * 0.02), // Dynamic padding
           child: Icon(
             icon,
-            size: 30, // Slightly larger icon size
-            color: currentTabIndex == index
-                ? Colors.blueAccent
-                : const Color.fromARGB(223, 255, 255, 255),
+            size: iconSize, // Dynamic icon size
+            color: currentTabIndex == index ? Colors.blueAccent : Colors.white,
           ),
         ),
       ),

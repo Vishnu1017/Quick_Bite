@@ -1,5 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:quick_bite/pages/details.dart';
 import 'package:quick_bite/pages/order.dart' as order_page;
 import 'package:quick_bite/service/database.dart';
@@ -14,7 +14,11 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  bool icecream = false, pizza = false, salad = false, burger = false;
+  bool icecream = false,
+      pizza = false,
+      salad = false,
+      burger = false,
+      chaat = false;
   Stream? fooditemStream;
   String? name, id;
   int _cartItemCount = 0;
@@ -54,6 +58,8 @@ class _HomeState extends State<Home> {
                   scrollDirection: Axis.vertical,
                   itemBuilder: (context, index) {
                     DocumentSnapshot ds = snapshot.data.docs[index];
+                    double imageSize = MediaQuery.of(context).size.width *
+                        0.4; // Adjust image size
                     return GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -67,12 +73,14 @@ class _HomeState extends State<Home> {
                                     )));
                       },
                       child: Container(
-                        margin: const EdgeInsets.only(bottom: 30),
+                        margin: EdgeInsets.only(
+                            bottom: MediaQuery.of(context).size.height * 0.03),
                         child: Material(
                           elevation: 5,
                           borderRadius: BorderRadius.circular(15),
                           child: Container(
-                            padding: const EdgeInsets.all(5),
+                            padding: EdgeInsets.all(
+                                MediaQuery.of(context).size.width * 0.02),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -80,43 +88,45 @@ class _HomeState extends State<Home> {
                                   borderRadius: BorderRadius.circular(15),
                                   child: Image.network(
                                     ds["Image"],
-                                    height: 150,
-                                    width: 150,
+                                    height: imageSize,
+                                    width: imageSize,
                                     fit: BoxFit.cover,
                                   ),
                                 ),
-                                const SizedBox(width: 20),
-                                Column(
-                                  children: [
-                                    Container(
-                                      width:
-                                          MediaQuery.of(context).size.width / 2,
-                                      child: Text(
+                                SizedBox(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.05),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
                                         ds["Name"],
                                         style:
                                             AppWidget.semiboldTextFeildStyle(),
                                       ),
-                                    ),
-                                    const SizedBox(height: 5),
-                                    Container(
-                                      width:
-                                          MediaQuery.of(context).size.width / 2,
-                                      child: Text(
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.01),
+                                      Text(
                                         "Honey goot cheese",
                                         style: AppWidget.LightTextFeildStyle(),
                                       ),
-                                    ),
-                                    const SizedBox(height: 5),
-                                    Container(
-                                      width:
-                                          MediaQuery.of(context).size.width / 2,
-                                      child: Text(
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.01),
+                                      Text(
                                         "₹${ds["Price"]}",
                                         style:
                                             AppWidget.semiboldTextFeildStyle(),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 )
                               ],
                             ),
@@ -141,6 +151,8 @@ class _HomeState extends State<Home> {
                   scrollDirection: Axis.horizontal,
                   itemBuilder: (context, index) {
                     DocumentSnapshot ds = snapshot.data.docs[index];
+                    double imageSize = MediaQuery.of(context).size.width *
+                        0.4; // Adjust image size
                     return GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -154,15 +166,17 @@ class _HomeState extends State<Home> {
                                     )));
                       },
                       child: Container(
-                        margin: const EdgeInsets.only(
-                            right: 10, left: 10, bottom: 10),
+                        margin: EdgeInsets.symmetric(
+                            horizontal:
+                                MediaQuery.of(context).size.width * 0.02,
+                            vertical:
+                                MediaQuery.of(context).size.height * 0.01),
                         child: Material(
                           elevation: 5,
                           borderRadius: BorderRadius.circular(15),
                           child: Container(
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15)),
-                            padding: const EdgeInsets.all(15),
+                            padding: EdgeInsets.all(
+                                MediaQuery.of(context).size.width * 0.02),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -170,22 +184,28 @@ class _HomeState extends State<Home> {
                                   borderRadius: BorderRadius.circular(15),
                                   child: Image.network(
                                     ds["Image"],
-                                    height: 150,
-                                    width: 150,
+                                    height: imageSize,
+                                    width: imageSize,
                                     fit: BoxFit.cover,
                                   ),
                                 ),
-                                const SizedBox(height: 10),
+                                SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.01),
                                 Text(
                                   ds["Name"],
                                   style: AppWidget.semiboldTextFeildStyle(),
                                 ),
-                                const SizedBox(height: 5),
+                                SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.01),
                                 Text(
                                   "Fresh and Healthy",
                                   style: AppWidget.LightTextFeildStyle(),
                                 ),
-                                const SizedBox(height: 5),
+                                SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.01),
                                 Text(
                                   "₹${ds["Price"]}",
                                   style: AppWidget.semiboldTextFeildStyle(),
@@ -213,7 +233,8 @@ class _HomeState extends State<Home> {
               children: [
                 IconButton(
                   icon: Container(
-                    padding: EdgeInsets.all(3),
+                    padding: EdgeInsets.all(
+                        MediaQuery.of(context).size.width * 0.01),
                     decoration: BoxDecoration(
                       color: Colors.black,
                       borderRadius: BorderRadius.circular(8),
@@ -222,12 +243,10 @@ class _HomeState extends State<Home> {
                         Icon(Icons.shopping_cart_outlined, color: Colors.white),
                   ),
                   onPressed: () {
-                    // Reset the cart item count to zero (optional logic based on your app)
                     setState(() {
-                      _cartItemCount = 0; // Hide the badge
+                      _cartItemCount = 0;
                     });
 
-                    // Navigate to the Order page
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -236,25 +255,24 @@ class _HomeState extends State<Home> {
                     );
                   },
                 ),
-                if (_cartItemCount >
-                    0) // Only show the badge if count is greater than 0
+                if (_cartItemCount > 0)
                   Positioned(
                     right: 0,
                     child: Container(
-                      padding: const EdgeInsets.all(3),
+                      padding: EdgeInsets.all(
+                          MediaQuery.of(context).size.width * 0.01),
                       decoration: BoxDecoration(
                         color: Colors.red,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      constraints: const BoxConstraints(
-                        minWidth: 20,
-                        minHeight: 20,
+                      constraints: BoxConstraints(
+                        minWidth: MediaQuery.of(context).size.width * 0.05,
                       ),
                       child: Text(
                         '$_cartItemCount',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white,
-                          fontSize: 12,
+                          fontSize: MediaQuery.of(context).size.width * 0.03,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -267,7 +285,10 @@ class _HomeState extends State<Home> {
       ),
       body: SingleChildScrollView(
         child: Container(
-          margin: const EdgeInsets.only(left: 20, right: 20, bottom: 30),
+          margin: EdgeInsets.symmetric(
+            horizontal: MediaQuery.of(context).size.width * 0.05,
+            vertical: MediaQuery.of(context).size.height * 0.03,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -279,11 +300,11 @@ class _HomeState extends State<Home> {
                 "Discover and Get Great Food",
                 style: AppWidget.LightTextFeildStyle(),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.02),
               showItem(),
-              const SizedBox(height: 30),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.03),
               SizedBox(height: 300, child: allItems()),
-              const SizedBox(height: 30),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.03),
               allItemsVertically(),
             ],
           ),
@@ -302,6 +323,7 @@ class _HomeState extends State<Home> {
             pizza = false;
             salad = false;
             burger = false;
+            chaat = false;
             fooditemStream = await DatabaseMethods().getFoodItem("Ice-cream");
             setState(() {});
           },
@@ -330,6 +352,7 @@ class _HomeState extends State<Home> {
             pizza = true;
             salad = false;
             burger = false;
+            chaat = false;
             fooditemStream = await DatabaseMethods().getFoodItem("Pizza");
             setState(() {});
           },
@@ -358,6 +381,7 @@ class _HomeState extends State<Home> {
             pizza = false;
             salad = true;
             burger = false;
+            chaat = false;
             fooditemStream = await DatabaseMethods().getFoodItem("Salad");
             setState(() {});
           },
@@ -386,6 +410,7 @@ class _HomeState extends State<Home> {
             pizza = false;
             salad = false;
             burger = true;
+            chaat = false;
             fooditemStream = await DatabaseMethods().getFoodItem("Burger");
             setState(() {});
           },
@@ -404,6 +429,35 @@ class _HomeState extends State<Home> {
                 width: 40,
                 fit: BoxFit.cover,
                 color: burger ? Colors.white : Colors.black,
+              ),
+            ),
+          ),
+        ),
+        GestureDetector(
+          onTap: () async {
+            icecream = false;
+            pizza = false;
+            salad = false;
+            burger = false;
+            chaat = true;
+            fooditemStream = await DatabaseMethods().getFoodItem("Chaats");
+            setState(() {});
+          },
+          child: Material(
+            elevation: 5,
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              decoration: BoxDecoration(
+                color: chaat ? Colors.black : Colors.white,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: const EdgeInsets.all(8),
+              child: Image.asset(
+                "images/chaat.png",
+                height: 40,
+                width: 40,
+                fit: BoxFit.cover,
+                color: chaat ? Colors.white : Colors.black,
               ),
             ),
           ),

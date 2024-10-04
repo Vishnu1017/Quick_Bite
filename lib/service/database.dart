@@ -104,14 +104,23 @@ class DatabaseMethods {
         .update({"Quantity": quantity});
   }
 
-  Future<void> removeCartItem(String userId, String itemId) async {
-    // Assuming you have a Firestore reference to the cart collection
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Future<QuerySnapshot> getFoodCartSnapshot(String userId) async {
+    return await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('Cart')
+        .get();
+  }
+
+  Future<void> removeItemFromCart(String userId, String itemId) async {
     await FirebaseFirestore.instance
         .collection('users')
         .doc(userId)
         .collection('Cart')
         .doc(itemId)
-        .delete(); // Deletes the specific item from the user's cart
+        .delete();
   }
 
 //ADMIN

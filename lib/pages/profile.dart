@@ -242,83 +242,87 @@ class _ProfileState extends State<Profile> {
         ),
       ),
       body: StreamBuilder<DocumentSnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection("users")
-            .doc(AuthMethods().getCurrentUserId())
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (!snapshot.hasData || !snapshot.data!.exists) {
-            return const Center(child: Text('User does not exist'));
-          }
+          stream: FirebaseFirestore.instance
+              .collection("users")
+              .doc(AuthMethods().getCurrentUserId())
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (!snapshot.hasData || !snapshot.data!.exists) {
+              return const Center(child: Text('User does not exist'));
+            }
 
-          var userData = snapshot.data!;
-          name = userData['Name'];
-          email = userData['Email'];
-          phoneNumber = userData['PhoneNumber'];
-          profileImageUrl = userData['profileImage'];
-          address = userData['Address'];
+            var userData = snapshot.data!;
+            var userMap = userData.data() as Map<String, dynamic>; // Cast here
 
-          return SingleChildScrollView(
-            child: Container(
-              margin: EdgeInsets.only(bottom: 40),
-              child: Column(
-                children: [
-                  Container(
-                    margin: EdgeInsets.only(right: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        ElevatedButton.icon(
-                          onPressed: showEditDialog,
-                          icon: const Icon(Icons.edit,
-                              size: 18), // Add an edit icon
-                          label: Text(
-                            'Edit Profile',
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w700),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            backgroundColor: Colors.blue, // Text color
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 12, horizontal: 16), // Padding
-                            shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.circular(10), // Rounded corners
+            // Now check for keys safely
+            name = userMap['Name'];
+            email = userMap['Email'];
+            phoneNumber = userMap.containsKey('PhoneNumber')
+                ? userMap['PhoneNumber']
+                : null;
+            profileImageUrl = userMap.containsKey('profileImage')
+                ? userMap['profileImage']
+                : null;
+            address =
+                userMap.containsKey('Address') ? userMap['Address'] : null;
+
+            return SingleChildScrollView(
+              child: Container(
+                margin: EdgeInsets.only(bottom: 40),
+                child: Column(
+                  children: [
+                    Container(
+                      margin: EdgeInsets.only(right: 20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          ElevatedButton.icon(
+                            onPressed: showEditDialog,
+                            icon: const Icon(Icons.edit, size: 18),
+                            label: Text(
+                              'Edit Profile',
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.w700),
                             ),
-                            elevation: 5, // Shadow effect
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              backgroundColor: Colors.blue,
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 12, horizontal: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              elevation: 5,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  buildUserInfoCard(Icons.person, "Name", name!),
-                  const SizedBox(height: 30),
-                  buildUserInfoCard(Icons.mail, "Email", email!),
-                  const SizedBox(height: 30),
-                  buildUserInfoCard(
-                      Icons.phone, "Phone", phoneNumber ?? "Not set"),
-                  const SizedBox(height: 30),
-                  buildUserInfoCard(Icons.home, "Address",
-                      address ?? "Not set"), // Add this line
-
-                  const SizedBox(height: 30),
-                  buildUserInfoCard(
-                      Icons.description, "Terms and Condition", "Read more..."),
-                  const SizedBox(height: 30),
-                  buildDeleteAccountButton(),
-                  const SizedBox(height: 30),
-                  buildLogoutButton(),
-                ],
+                    const SizedBox(height: 20),
+                    buildUserInfoCard(Icons.person, "Name", name ?? "Not set"),
+                    const SizedBox(height: 30),
+                    buildUserInfoCard(Icons.mail, "Email", email ?? "Not set"),
+                    const SizedBox(height: 30),
+                    buildUserInfoCard(
+                        Icons.phone, "Phone", phoneNumber ?? "Not set"),
+                    const SizedBox(height: 30),
+                    buildUserInfoCard(
+                        Icons.home, "Address", address ?? "Not set"),
+                    const SizedBox(height: 30),
+                    buildUserInfoCard(Icons.description, "Terms and Condition",
+                        "Read more..."),
+                    const SizedBox(height: 30),
+                    buildDeleteAccountButton(),
+                    const SizedBox(height: 30),
+                    buildLogoutButton(),
+                  ],
+                ),
               ),
-            ),
-          );
-        },
-      ),
+            );
+          }),
     );
   }
 

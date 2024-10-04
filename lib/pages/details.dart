@@ -19,7 +19,7 @@ class Details extends StatefulWidget {
 
 class _DetailsState extends State<Details> {
   int a = 1; // Quantity
-  double total = 0; // Change to double
+  int total = 0;
   String? id;
 
   gettheonload() async {
@@ -35,7 +35,7 @@ class _DetailsState extends State<Details> {
   @override
   void initState() {
     ontheload();
-    total = double.parse(widget.price); // Parse price to double
+    total = int.parse(widget.price);
     super.initState();
   }
 
@@ -82,8 +82,7 @@ class _DetailsState extends State<Details> {
                   onTap: () {
                     if (a > 1) {
                       --a;
-                      total = total -
-                          double.parse(widget.price); // Update total as double
+                      total = total - int.parse(widget.price);
                     }
                     setState(() {});
                   },
@@ -106,8 +105,7 @@ class _DetailsState extends State<Details> {
                 GestureDetector(
                   onTap: () {
                     ++a;
-                    total = total +
-                        double.parse(widget.price); // Update total as double
+                    total = total + int.parse(widget.price);
                     setState(() {});
                   },
                   child: Container(
@@ -169,7 +167,7 @@ class _DetailsState extends State<Details> {
                         backgroundColor: Colors.green,
                         content: Text(
                           "Food has been added to Cart",
-                          style: TextStyle(fontSize: 20),
+                          style: TextStyle(fontSize: 18),
                         ),
                       ));
                     },

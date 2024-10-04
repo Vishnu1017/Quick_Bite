@@ -35,7 +35,7 @@ class _SignUpState extends State<SignUp> {
             backgroundColor: Colors.green,
             content: Text(
               "Registered Successfully",
-              style: TextStyle(fontSize: 20),
+              style: TextStyle(fontSize: 18),
             )));
 
         String userId = userCredential.user!.uid; // Use the generated user ID

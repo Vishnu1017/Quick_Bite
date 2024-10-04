@@ -23,7 +23,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           // backgroundColor: Colors.green,
           content: const Text(
         "Pssword Reset Email has been sent!",
-        style: TextStyle(fontSize: 20),
+        style: TextStyle(fontSize: 18),
       )));
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {

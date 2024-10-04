@@ -14,222 +14,229 @@ class Order extends StatefulWidget {
 
 class _OrderState extends State<Order> {
   String? id, wallet;
-  int total = 0;
-  Stream<QuerySnapshot>? foodStream;
+  double total = 0.0;
+  Stream? foodStream;
 
   void startTimer() {
-    Timer(const Duration(seconds: 2), () {
+    Timer(Duration(milliseconds: 50), () {
       setState(() {});
     });
   }
 
-  Future<void> getSharedPref() async {
+  // Get user ID and wallet balance from shared preferences
+  getthesharedpref() async {
     id = await SharedPreferenceHelper().getUserId();
     wallet = await SharedPreferenceHelper().getUserWallet();
     setState(() {});
   }
 
-  Future<void> loadData() async {
-    await getSharedPref();
+  // Load the food cart from the database
+  ontheload() async {
+    await getthesharedpref();
     foodStream = DatabaseMethods().getFoodCart(id!);
-    total = 0; // Reset total before calculating again
     setState(() {});
-  }
-
-  Future<void> clearCart() async {
-    if (id != null) {
-      await DatabaseMethods().clearUserCart(id!); // Clear the user's cart
-      await loadData(); // Refresh data and recalculate total
-    }
-  }
-
-  Future<void> removeCartItem(String itemId) async {
-    await DatabaseMethods()
-        .removeCartItem(id!, itemId); // Remove the item from the cart
-    recalculateTotal(); // Update the total after removing the item
-  }
-
-  void showSnackBar(String message, BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(
-        message,
-        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-      ),
-    ));
-  }
-
-  Future<void> updateQuantity(String itemId, int quantity) async {
-    if (quantity <= 0) return;
-    await DatabaseMethods().updateCartItemQuantity(id!, itemId, quantity);
-    recalculateTotal(); // Ensure recalculating after updating quantity
-  }
-
-  void recalculateTotal() async {
-    total = 0; // Reset total
-    if (id != null) {
-      final foodItems = await DatabaseMethods().getFoodCart(id!);
-      final snapshot = await foodItems.first;
-      for (var doc in snapshot.docs) {
-        // Debugging: Print the entire document
-        print("Document data: ${doc.data()}");
-
-        int quantity = num.tryParse(doc["Quantity"].toString())?.toInt() ?? 1;
-        int itemTotal = num.tryParse(doc["Total"].toString())?.toInt() ?? 0;
-
-        // Fallback logic if Total is 0
-        if (itemTotal == 0) {
-          int price = num.tryParse(doc["Price"].toString())?.toInt() ??
-              0; // Ensure price exists
-          itemTotal =
-              price * quantity; // Calculate total from price and quantity
-        }
-
-        total += itemTotal; // Update total price
-        print(
-            "Item: ${doc["Name"]}, Quantity: $quantity, ItemTotal: $itemTotal");
-      }
-      print("Total Price: $total");
-      setState(() {}); // Update the UI with the new total
-    }
-  }
-
-  Future<void> placeOrder() async {
-    if (wallet != null && total > 0) {
-      if (int.tryParse(wallet!)! < total) {
-        showSnackBar("Insufficient balance to complete the checkout.", context);
-      } else {
-        int amount = int.parse(wallet!) - total;
-        await DatabaseMethods().UpdateUserWallet(id!, amount.toString());
-        await SharedPreferenceHelper().saveUserWallet(amount.toString());
-
-        // Create the order in Firestore
-        List<Map<String, dynamic>> cartItems =
-            await DatabaseMethods().getCartItems(id!);
-        await DatabaseMethods()
-            .addOrder(id!, cartItems, total); // Add order to Firestore
-
-        await clearCart(); // Clear the cart after successful checkout
-        showSnackBar("Order placed successfully!", context);
-      }
-    }
   }
 
   @override
   void initState() {
     super.initState();
+    ontheload();
     startTimer();
-    loadData();
   }
 
   Widget foodCart() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: foodStream,
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator.adaptive());
-        }
+    return StreamBuilder(
+        stream: foodStream,
+        builder: (context, AsyncSnapshot snapshot) {
+          if (!snapshot.hasData) {
+            return Center(child: CircularProgressIndicator.adaptive());
+          }
 
-        return ListView.builder(
-          padding: EdgeInsets.zero,
-          itemCount: snapshot.data!.docs.length,
-          shrinkWrap: true,
-          itemBuilder: (context, index) {
-            DocumentSnapshot ds = snapshot.data!.docs[index];
-            int quantity = num.tryParse(ds["Quantity"].toString())?.toInt() ??
-                1; // Ensure this is an int
-            int itemTotal = num.tryParse(ds["Total"].toString())?.toInt() ??
-                0; // Ensure total is parsed
+          // Reset total for new calculation
+          total = 0;
+          List<DocumentSnapshot> cartItems = snapshot.data.docs;
 
-            // Fallback logic if Total is 0
-            if (itemTotal == 0) {
-              int price = num.tryParse(ds["Price"].toString())?.toInt() ??
-                  0; // Ensure price exists
-              itemTotal =
-                  price * quantity; // Calculate total from price and quantity
-            }
+          return ListView.builder(
+              padding: EdgeInsets.zero,
+              itemCount: cartItems.length,
+              shrinkWrap: true,
+              scrollDirection: Axis.vertical,
+              itemBuilder: (context, index) {
+                DocumentSnapshot ds = cartItems[index];
 
-            return Container(
-              margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
-              child: Material(
-                elevation: 6,
-                borderRadius: BorderRadius.circular(10),
-                child: Container(
-                  decoration:
-                      BoxDecoration(borderRadius: BorderRadius.circular(10)),
-                  padding: const EdgeInsets.all(10),
-                  child: Row(
-                    children: [
-                      // Quantity Container
-                      Container(
-                        height: 90,
-                        width: 40,
-                        decoration: BoxDecoration(
-                          border: Border.all(),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Center(
-                            child: Text(
-                                quantity.toString())), // Quantity as string
+                // Calculate item total here
+                double itemTotal =
+                    double.tryParse(ds["Total"].toString()) ?? 0.0;
+                total += itemTotal; // Update overall total here
+
+                return Dismissible(
+                  key: Key(ds.id),
+                  background: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.redAccent, Colors.red],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
-                      const SizedBox(width: 20),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: Image.network(
-                          ds["Image"],
-                          height: 90,
-                          width: 90,
-                          fit: BoxFit.cover,
+                      borderRadius: BorderRadius.circular(50),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.5),
+                          blurRadius: 12,
+                          offset: Offset(0, 6),
                         ),
+                      ],
+                    ),
+                    alignment: Alignment.centerRight,
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Icon(
+                          Icons.delete_outline,
+                          color: Colors.white,
+                          size: 36,
+                        ),
+                        SizedBox(width: 10),
+                        Text(
+                          'Remove',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  direction: DismissDirection.endToStart,
+                  onDismissed: (direction) async {
+                    // Remove item from Firestore
+                    await DatabaseMethods().removeItemFromCart(id!, ds.id);
+
+                    // Show a snackbar for feedback
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          "${ds["Name"]} removed from cart",
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        backgroundColor: Colors.red,
                       ),
-                      const SizedBox(width: 20),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                    );
+
+                    setState(() {
+                      foodStream = DatabaseMethods().getFoodCart(id!);
+                    });
+                  },
+                  child: AnimatedContainer(
+                    duration: Duration(milliseconds: 300), // Animation duration
+                    curve: Curves.easeInOut, // Animation curve
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(color: Colors.teal, width: 2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.3),
+                          spreadRadius: 2,
+                          blurRadius: 8,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(25),
+                      child: Padding(
+                        padding: const EdgeInsets.all(15),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text(
-                              ds["Name"],
-                              style: AppWidget.semiboldTextFeildStyle(),
-                            ),
-                            Text(
-                              "₹${itemTotal * quantity}", // Display total for the item based on quantity
-                              style: AppWidget.semiboldTextFeildStyle(),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.remove),
-                                  onPressed: () {
-                                    if (quantity > 1) {
-                                      // Decrease the quantity
-                                      updateQuantity(ds.id, quantity - 1);
-                                    } else {
-                                      // Optionally, confirm before removing
-                                      removeCartItem(ds
-                                          .id); // Remove the item completely from the cart
-                                    }
-                                  },
+                            // Quantity Container with a unique design
+                            Container(
+                              height: 70,
+                              width: 50,
+                              decoration: BoxDecoration(
+                                color: Colors.teal,
+                                borderRadius: BorderRadius.circular(15),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    spreadRadius: 1,
+                                    blurRadius: 6,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Center(
+                                child: Text(
+                                  ds["Quantity"],
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    fontSize: 24,
+                                  ),
                                 ),
-                                IconButton(
-                                  icon: const Icon(Icons.add),
-                                  onPressed: () {
-                                    updateQuantity(ds.id, quantity + 1);
-                                  },
-                                ),
-                              ],
+                              ),
+                            ),
+                            const SizedBox(width: 20),
+                            // Diamond-shaped image
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.network(
+                                ds["Image"],
+                                height: 70,
+                                width: 70,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            const SizedBox(width: 20),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    ds["Name"],
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    "₹${itemTotal.toStringAsFixed(2)}",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                      color: Colors.teal[700],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
+                );
+              });
+        });
+  }
+
+  // New method to clear all items from the cart
+  Future<void> clearCart() async {
+    if (foodStream != null) {
+      QuerySnapshot cartSnapshot =
+          await DatabaseMethods().getFoodCartSnapshot(id!);
+      for (DocumentSnapshot ds in cartSnapshot.docs) {
+        await DatabaseMethods().removeItemFromCart(id!, ds.id);
+      }
+    }
   }
 
   @override
@@ -252,7 +259,7 @@ class _OrderState extends State<Order> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              height: MediaQuery.of(context).size.height / 1.6,
+              height: MediaQuery.of(context).size.height * 0.55,
               child: foodCart(),
             ),
             const Spacer(),
@@ -267,7 +274,7 @@ class _OrderState extends State<Order> {
                     style: AppWidget.boldTextFeildStyle(),
                   ),
                   Text(
-                    "₹$total", // Display the total price
+                    "₹${total.toStringAsFixed(2)}",
                     style: AppWidget.semiboldTextFeildStyle(),
                   ),
                 ],
@@ -279,16 +286,53 @@ class _OrderState extends State<Order> {
               margin: const EdgeInsets.only(left: 20, right: 20, bottom: 35),
               child: ElevatedButton(
                 onPressed: () async {
-                  await placeOrder(); // Call placeOrder here
+                  double currentWallet =
+                      double.parse(wallet!); // Get the current wallet balance
+
+                  if (currentWallet < total) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          "Insufficient balance. Please recharge your wallet.",
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  } else {
+                    double amount =
+                        currentWallet - total; // Calculate the new balance
+                    await DatabaseMethods()
+                        .UpdateUserWallet(id!, amount.toString());
+                    await SharedPreferenceHelper()
+                        .saveUserWallet(amount.toString());
+
+                    // Clear the cart items after checkout
+                    await clearCart();
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          "Checkout successful! Your new balance is ₹${amount.toStringAsFixed(2)}",
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+
+                    // Refresh the food cart
+                    foodStream = DatabaseMethods().getFoodCart(id!);
+                    setState(() {});
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(vertical: 10),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(15),
                   ),
+                  padding: EdgeInsets.symmetric(vertical: 15),
                 ),
-                child: const Text(
+                child: Text(
                   "CheckOut",
                   style: TextStyle(
                     color: Colors.white,
