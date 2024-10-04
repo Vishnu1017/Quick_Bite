@@ -225,7 +225,7 @@ class _WalletState extends State<Wallet> {
   Future<void> displayPaymentSheet(String amount) async {
     try {
       await Stripe.instance.presentPaymentSheet().then((value) async {
-        add = int.parse(wallet!) + int.parse(amount);
+        add = (double.parse(wallet!) + double.parse(amount)).toInt();
         await SharedPreferenceHelper().saveUserWallet(add.toString());
         await DatabaseMethods().UpdateUserWallet(id!, add.toString());
         showDialog(

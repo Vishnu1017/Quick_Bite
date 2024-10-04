@@ -101,59 +101,162 @@ class _ProfileState extends State<Profile> {
     TextEditingController addressController =
         TextEditingController(text: address);
 
+    final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Edit Profile'),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          elevation: 10,
+          backgroundColor: Colors.white,
+          title: const Text(
+            'Edit Profile',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 24,
+              color: Colors.black,
+            ),
+          ),
           content: SingleChildScrollView(
-            child: Column(
-              children: [
-                TextField(
-                  controller: nameController,
-                  decoration:
-                      const InputDecoration(hintText: 'Enter your name'),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildTextField(
+                      controller: nameController,
+                      label: 'Name',
+                      hint: 'Enter your name',
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your name';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    _buildTextField(
+                      controller: emailController,
+                      label: 'Email',
+                      hint: 'Enter your email',
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your email';
+                        } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                            .hasMatch(value)) {
+                          return 'Please enter a valid email';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    _buildTextField(
+                      controller: phoneController,
+                      label: 'Phone Number',
+                      hint: 'Enter your phone number',
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your phone number';
+                        } else if (!RegExp(r'^\+?[0-9]{10,15}$')
+                            .hasMatch(value)) {
+                          return 'Please enter a valid phone number';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    _buildTextField(
+                      controller: addressController,
+                      label: 'Address',
+                      hint: 'Enter your address',
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your address';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
                 ),
-                TextField(
-                  controller: emailController,
-                  decoration:
-                      const InputDecoration(hintText: 'Enter your email'),
-                ),
-                TextField(
-                  controller: phoneController,
-                  decoration: const InputDecoration(
-                      hintText: 'Enter your phone number'),
-                ),
-                TextField(
-                  controller: addressController, // Add this field
-                  decoration: const InputDecoration(
-                      hintText: 'Enter your address'), // Add this line
-                ),
-              ],
+              ),
             ),
           ),
           actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
+            _buildDialogButton(
+              text: 'Cancel',
+              color: Colors.red.shade400,
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
-            TextButton(
-              child: const Text('Save'),
+            _buildDialogButton(
+              text: 'Save',
+              color: Colors.green.shade400,
               onPressed: () {
-                updateUserFields(
-                  nameController.text,
-                  emailController.text,
-                  phoneController.text,
-                  addressController.text, // Pass the address here
-                );
-                Navigator.of(context).pop();
+                if (_formKey.currentState!.validate()) {
+                  updateUserFields(
+                    nameController.text,
+                    emailController.text,
+                    phoneController.text,
+                    addressController.text,
+                  );
+                  Navigator.of(context).pop();
+                }
               },
             ),
           ],
         );
       },
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required String? Function(String?) validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Colors.grey),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Colors.blue),
+        ),
+      ),
+      validator: validator,
+    );
+  }
+
+  Widget _buildDialogButton({
+    required String text,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return TextButton(
+      style: TextButton.styleFrom(
+        backgroundColor: color,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+        ),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(color: Colors.white, fontSize: 16),
+      ),
+      onPressed: onPressed,
     );
   }
 
