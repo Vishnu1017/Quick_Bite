@@ -117,7 +117,31 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
                 contents.length,
-                (index) => buildDot(index, context),
+                (index) => AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  margin: const EdgeInsets.only(right: 5),
+                  height: currentIndex == index
+                      ? 12
+                      : 8, // Scale effect on the selected dot
+                  width: currentIndex == index
+                      ? 22
+                      : 8, // Scale effect on the width
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: currentIndex == index
+                        ? Colors.blue[900] // Color for selected dot
+                        : Colors.grey, // Color for unselected dots
+                    boxShadow: currentIndex == index
+                        ? [
+                            BoxShadow(
+                              color: Colors.blue.withOpacity(0.5),
+                              blurRadius: 5,
+                              spreadRadius: 2,
+                            )
+                          ] // Add shadow to the active dot for emphasis
+                        : [],
+                  ),
+                ),
               ),
             ),
             GestureDetector(

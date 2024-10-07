@@ -123,7 +123,10 @@ class _HomeState extends State<Home> {
                                       Text(
                                         "₹${ds["Price"]}",
                                         style:
-                                            AppWidget.semiboldTextFeildStyle(),
+                                            AppWidget.semiboldTextFeildStyle()
+                                                .copyWith(
+                                                    fontSize: 16,
+                                                    color: Colors.green),
                                       ),
                                     ],
                                   ),
@@ -208,7 +211,9 @@ class _HomeState extends State<Home> {
                                         0.01),
                                 Text(
                                   "₹${ds["Price"]}",
-                                  style: AppWidget.semiboldTextFeildStyle(),
+                                  style: AppWidget.semiboldTextFeildStyle()
+                                      .copyWith(
+                                          fontSize: 16, color: Colors.green),
                                 )
                               ],
                             ),
